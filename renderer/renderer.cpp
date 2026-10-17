@@ -82,7 +82,7 @@ void Renderer::mainPassRecordingStart(){
     uint32_t dynamicOffset = allocPerUBuf_ * stateInfo.currentFrameSlot;
     deviceFuncs_->vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout_, 0, 1, &descriptorSet_, 1, &dynamicOffset);
     //
-    VkViewport vp = {0, 0, float(viewportSize_.width()), float(viewportSize_.height()), 0.0f, 1.0f};
+    VkViewport vp = { float(pos_.x()), float(pos_.y()), float(viewportSize_.width()), float(viewportSize_.height()), 0.0f, 1.0f };
     deviceFuncs_->vkCmdSetViewport(cb, 0,1, &vp);
     VkRect2D scissor = { {0,0}, {uint32_t(viewportSize_.width()), uint32_t(viewportSize_.height())} };
     deviceFuncs_->vkCmdSetScissor(cb, 0, 1, &scissor);
@@ -342,7 +342,7 @@ void Renderer::CreateVulkanPipeline(){
     blendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     VkPipelineColorBlendAttachmentState blend;
     memset(&blend, 0, sizeof(blend));
-    blend.blendEnable = true;
+    blend.blendEnable = false;
     blend.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
     blend.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
     blend.colorBlendOp = VK_BLEND_OP_ADD;

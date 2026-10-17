@@ -19,7 +19,7 @@ void VulkanView::handleWindowChanged(QQuickWindow *win)
         connect(win, &QQuickWindow::beforeSynchronizing, this, &VulkanView::sync, Qt::DirectConnection);
         connect(win, &QQuickWindow::sceneGraphInvalidated, this, &VulkanView::cleanup, Qt::DirectConnection);
 
-        // Ensure we start with cleared to black. The squircle's blend mode relies on this.
+        // Ensure we start with cleared to black.
         win->setColor(Qt::black);
     }
 }
@@ -40,7 +40,7 @@ void VulkanView::sync(){
         // would render the squircle on top (overlay).
         connect(window(), &QQuickWindow::afterRenderPassRecording, renderer_, &Renderer::mainPassRecordingStart, Qt::DirectConnection);
     }
-    renderer_->setViewportSize( window()->size() * window()->devicePixelRatio() );
+    renderer_->setViewportSize( position(), size() );
     renderer_->setWindow(window());
 }
 

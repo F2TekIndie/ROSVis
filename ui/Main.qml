@@ -10,7 +10,7 @@ Item {
     Rectangle{
         width: 1600
         height: 1000
-        color: "green"
+        color: "black"
 
         RowLayout {
             id: main

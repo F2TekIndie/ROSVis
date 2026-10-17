@@ -25,7 +25,7 @@ public:
     ~Renderer();
 
     //
-    void setViewportSize(const QSize &size) { viewportSize_ = size; }
+    void setViewportSize(const QPointF &pos, const QSizeF &size) { pos_ = pos; viewportSize_ = size; }
     void setWindow(QQuickWindow *window) { window_ = window; }
 
 public slots:
@@ -56,7 +56,8 @@ private:
     VkDescriptorSet         descriptorSet_{VK_NULL_HANDLE};
     //
     QQuickWindow*   window_{nullptr};
-    QSize           viewportSize_{};
+    QSizeF          viewportSize_{};
+    QPointF         pos_{};
     bool            initialized_{false};
     //
     Shaders     vulkanShaders_{};
