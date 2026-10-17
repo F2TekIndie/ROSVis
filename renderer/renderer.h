@@ -5,6 +5,13 @@
 #include <vulkan/vulkan.h>
 #include <QObject>
 #include <QQuickWindow>
+#include "shaders.h"
+
+
+
+// FORWARDS
+class QVulkanDeviceFunctions;
+class QVulkanFunctions;
 
 
 
@@ -28,17 +35,35 @@ public slots:
 private:
     VkInstance          instance_{};
     VkSurfaceKHR        surface_{};
-    //
     VkPhysicalDevice    physical_{};
     VkDevice            device_{};
     //
+    QVulkanDeviceFunctions* deviceFuncs_{nullptr};
+    QVulkanFunctions*       instanceFuncs_{nullptr};
+    //
+    VkDeviceSize        allocPerUBuf_{0};
+    VkDeviceMemory      ubufMem_{VK_NULL_HANDLE};
+    VkBuffer            ubuf_{VK_NULL_HANDLE};
+    VkBuffer            vbuf_{VK_NULL_HANDLE};
+    VkDeviceMemory      vbufMem_{VK_NULL_HANDLE};
+    //
+    VkPipeline          pipeline_{VK_NULL_HANDLE};
+    VkPipelineLayout    pipelineLayout_{VK_NULL_HANDLE};
+    VkPipelineCache     pipelineCache_{VK_NULL_HANDLE};
+    //
+    VkDescriptorSetLayout   descriptorSetLayout_{VK_NULL_HANDLE};
+    VkDescriptorPool        descriptorPool_{VK_NULL_HANDLE};
+    VkDescriptorSet         descriptorSet_{VK_NULL_HANDLE};
+    //
     QQuickWindow*   window_{nullptr};
     QSize           viewportSize_{};
+    bool            initialized_{false};
     //
-    void Init();
-    void CreateDevice();
-    void CreateCommandBuffers();
-    void CreateGeometry();
+    Shaders     vulkanShaders_{};
+    //
+    void Init(int framesInFlight);
+    void CreateVulkanBuffers(int framesInFlight);
+    void CreateVulkanPipeline();
 };
 
 #endif // RENDERER_H

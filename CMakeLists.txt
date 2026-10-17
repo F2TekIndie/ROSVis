@@ -54,7 +54,39 @@ qt_add_qml_module(rosvis
     RESOURCE_PREFIX /ros2
     NO_RESOURCE_TARGET_PATH
     QML_FILES ui/Style.qml
+    SOURCES renderer/shaders.h renderer/shaders.cpp
 )
+
+set(SHADER_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/shader)
+set(SPIRV_DIR   ${CMAKE_CURRENT_BINARY_DIR}/shader)
+file(GLOB SHADERS
+    ${SHADER_DIR}/*.vert
+    ${SHADER_DIR}/*.frag
+    ${SHADER_DIR}/*.comp
+    ${SHADER_DIR}/*.geom
+    ${SHADER_DIR}/*.tesc
+    ${SHADER_DIR}/*.tese
+)
+set(SPIRV_OUTPUTS "")
+foreach(SHADER ${SHADERS})
+    get_filename_component(NAME ${SHADER} NAME)
+    set(SPIRV "${SPIRV_DIR}/${NAME}.spv")
+
+    add_custom_command(
+        OUTPUT  ${SPIRV}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${SPIRV_DIR}
+        COMMAND Vulkan::glslc
+                --target-env=vulkan1.3
+                -O
+                ${SHADER} -o ${SPIRV}
+        DEPENDS ${SHADER}
+        COMMENT "Compiling SPIR-V: ${NAME}"
+        VERBATIM
+    )
+    list(APPEND SPIRV_OUTPUTS ${SPIRV})
+endforeach()
+add_custom_target(shaders ALL DEPENDS ${SPIRV_OUTPUTS})
+add_dependencies(rosvis shaders)
 
 install(TARGETS rosvis
     BUNDLE DESTINATION .

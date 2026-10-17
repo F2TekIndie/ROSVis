@@ -1,6 +1,7 @@
 
 #include "vulkanview.h"
 #include <QPlatformSurfaceEvent>
+#include <QRunnable>
 #include "renderer/renderer.h"
 
 
@@ -24,6 +25,7 @@ void VulkanView::handleWindowChanged(QQuickWindow *win)
 }
 
 void VulkanView::cleanup(){
+    delete renderer_;
     renderer_ = nullptr;
 }
 
@@ -36,13 +38,22 @@ void VulkanView::sync(){
         // Here we want an underlay and therefore connect to
         // beforeRenderPassRecording. Changing to afterRenderPassRecording
         // would render the squircle on top (overlay).
-        connect(window(), &QQuickWindow::beforeRenderPassRecording, renderer_, &Renderer::mainPassRecordingStart, Qt::DirectConnection);
+        connect(window(), &QQuickWindow::afterRenderPassRecording, renderer_, &Renderer::mainPassRecordingStart, Qt::DirectConnection);
     }
-    renderer_->setViewportSize(window()->size() * window()->devicePixelRatio());
+    renderer_->setViewportSize( window()->size() * window()->devicePixelRatio() );
     renderer_->setWindow(window());
 }
 
+class CleanupJob : public QRunnable
+{
+public:
+    CleanupJob(Renderer *renderer) : m_renderer(renderer) { }
+    void run() override { delete m_renderer; }
+private:
+    Renderer *m_renderer;
+};
+
 void VulkanView::releaseResources(){
-    delete renderer_;
+    window()->scheduleRenderJob( new CleanupJob(renderer_), QQuickWindow::BeforeSynchronizingStage );
     renderer_ = nullptr;
 }

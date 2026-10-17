@@ -5,36 +5,38 @@ import ROSVis
 
 
 Item {
-    id: window
-    width: 800
-    height: 6000
+    id: root
     visible: true
+    Rectangle{
+        width: 1600
+        height: 1000
+        color: "green"
 
-    property bool lightMode: Application.styleHints.colorScheme === Qt.Dark
-    property color reallyDark: "#1f1f1f"
-    property color dark: "#262626"
-    property color reallyLight: "#e7e7e7"
-    property color light: "#e0e0e0"
+        RowLayout {
+            id: main
+            anchors.fill: parent
 
-    ColumnLayout {
-        id: main
-        anchors.fill: parent
+            ColumnLayout {
+                id: data
 
-        ColumnLayout {
-            id: data
+                VulkanView {
+                    id: renderer
+                    width: 1000
+                    height: 600
+                }
 
-            VulkanView {
-                id: renderer
+                DataTableView {
+                    id: dataTable
+                    width: 1000
+                    height: 400
+                }
             }
 
-            DataTableView {
-                id: dataTable
+            RosTopicsView{
+                id: topics
+                width: 600
+                height: 1000
             }
-        }
-
-        RosTopicsView{
-            id: topics
         }
     }
-
 }
