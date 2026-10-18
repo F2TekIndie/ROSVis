@@ -28,12 +28,18 @@ target_include_directories(meshoptimizer PUBLIC "${MESHOPTIMIZER_ROOT}/src")
 find_package(Vulkan REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick)
 
+#
+find_package(Boost REQUIRED COMPONENTS system)
+find_package(Threads REQUIRED)
+
 qt_standard_project_setup(REQUIRES 6.12)
 
 qt_add_executable(rosvis
     main.cpp
     renderer/renderer.cpp renderer/renderer.h
     ui/vulkanview.cpp ui/vulkanview.h
+    renderer/shaders.h renderer/shaders.cpp renderer/scene.h renderer/scene.cpp renderer/mesh.h renderer/mesh.cpp
+    ros2/adapter.h ros2/adapter.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -53,10 +59,12 @@ target_link_libraries(rosvis PRIVATE
     Qt6::Qml
     Qt6::Quick
     Vulkan::Vulkan
+    Boost::system
+    Threads::Threads
 )
 
-target_include_directories(rosvis
-    PRIVATE ui
+target_include_directories(rosvis PRIVATE
+    ui
 )
 
 set_source_files_properties(Style.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
@@ -64,14 +72,10 @@ set_source_files_properties(Style.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 qt_add_qml_module(rosvis
     URI ROSVis
     VERSION 1.0
-    QML_FILES
-    ui/DataTableView.qml ui/Main.qml ui/RosTopicsView.qml
-    SOURCES
-        ui/vulkanview.cpp ui/vulkanview.h
+    QML_FILES ui/DataTableView.qml ui/Main.qml ui/RosTopicsView.qml ui/Style.qml
+    SOURCES ui/vulkanview.cpp ui/vulkanview.h
     RESOURCE_PREFIX /ros2
     NO_RESOURCE_TARGET_PATH
-    QML_FILES ui/Style.qml
-    SOURCES renderer/shaders.h renderer/shaders.cpp
 )
 
 set(SHADER_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/shader)

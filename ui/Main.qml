@@ -9,13 +9,13 @@ ApplicationWindow {
     visible: true
 
     menuBar: MenuBar{
-
+        id: menu
     }
     header: ToolBar{
-
+        id: header
     }
     footer: TabBar{
-
+        id: footer
     }
 
     RowLayout {
@@ -23,7 +23,7 @@ ApplicationWindow {
         anchors.fill: parent
 
         ColumnLayout {
-            id: data
+            id: dataLayout
 
             VulkanView {
                 id: renderer
@@ -42,13 +42,40 @@ ApplicationWindow {
             }
         }
 
-        RosTopicsView{
-            id: topics
+        ColumnLayout{
+            id: topicsLayout
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.minimumWidth: 600
-            Layout.minimumHeight: 1000
             Layout.maximumWidth: 1000
+
+            TabBar{
+                id: topicsBar
+                Layout.fillWidth: true
+                Layout.minimumHeight: 30
+                Layout.maximumHeight: 30
+                TabButton{
+                    text: qsTr("Topics")
+                }
+                TabButton{
+                    text: qsTr("More Topics")
+                }
+            }
+
+            StackLayout{
+                id: detailLayout
+                Layout.minimumWidth: 600
+                Layout.minimumHeight: 1000
+                currentIndex: topicsBar.currentIndex
+
+                RosTopicsView{
+                    id: topicsTab
+                }
+
+                Rectangle{
+                    id: moretopicsTab
+                    color: "green"
+                }
+            }
         }
     }
 }
