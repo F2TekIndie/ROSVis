@@ -10,10 +10,8 @@ int main(int argc, char *argv[])
 
     QQuickWindow::setGraphicsApi( QSGRendererInterface::Vulkan );
     //
-    QQuickView view;
-    view.setResizeMode( QQuickView::SizeRootObjectToView );
-    view.setSource( QUrl("qrc:///ros2/ui/Main.qml") );
-    view.show();
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("ROSVis", "Main");
     //
     return app.exec();
 }

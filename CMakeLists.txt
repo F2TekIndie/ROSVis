@@ -2,12 +2,29 @@ cmake_minimum_required(VERSION 3.16)
 
 project(rosvis VERSION 0.1 LANGUAGES CXX)
 
+#
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(THIRD_PARTY_ROOT "/home/f2tek/SwDev" CACHE PATH "Root of third-party libraries")
 set(VULKAN_SDK_DEFAULT "${THIRD_PARTY_ROOT}/vulkansdk/x86_64")
 set(VULKAN_SDK "${VULKAN_SDK_DEFAULT}" CACHE PATH "LunarG Vulkan SDK root")
+set(ASSIMP_ROOT "${THIRD_PARTY_ROOT}/assimp" CACHE PATH "Assimp source or install directory")
+set(MESHOPTIMIZER_ROOT "${THIRD_PARTY_ROOT}/meshoptimizer" CACHE PATH "meshoptimizer source directory")
 
+
+#
+find_path(ASSIMP_INCLUDE_DIR assimp/Importer.hpp HINTS "${ASSIMP_ROOT}/include" REQUIRED)
+find_path(ASSIMP_CONFIG_INCLUDE_DIR assimp/config.h HINTS "${ASSIMP_ROOT}/build/include" "${ASSIMP_ROOT}/include" REQUIRED)
+find_library(ASSIMP_LIBRARY NAMES assimp HINTS "${ASSIMP_ROOT}/build/bin" "${ASSIMP_ROOT}/lib" REQUIRED)
+
+#
+file(GLOB MESHOPTIMIZER_SOURCES CONFIGURE_DEPENDS "${MESHOPTIMIZER_ROOT}/src/*.cpp")
+if(NOT MESHOPTIMIZER_SOURCES)
+    message(FATAL_ERROR "Set MESHOPTIMIZER_ROOT to a meshoptimizer source checkout")
+endif()
+add_library(meshoptimizer STATIC ${MESHOPTIMIZER_SOURCES})
+target_include_directories(meshoptimizer PUBLIC "${MESHOPTIMIZER_ROOT}/src")
+
+#
 find_package(Vulkan REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick)
 

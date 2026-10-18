@@ -1,42 +1,54 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls.Basic
+import QtQuick.Controls
 import ROSVis
 
 
-Item {
+ApplicationWindow {
     id: root
     visible: true
-    Rectangle{
-        width: 1600
-        height: 1000
-        color: "black"
 
-        RowLayout {
-            id: main
-            anchors.fill: parent
+    menuBar: MenuBar{
 
-            ColumnLayout {
-                id: data
+    }
+    header: ToolBar{
 
-                VulkanView {
-                    id: renderer
-                    width: 1000
-                    height: 600
-                }
+    }
+    footer: TabBar{
 
-                DataTableView {
-                    id: dataTable
-                    width: 1000
-                    height: 400
-                }
+    }
+
+    RowLayout {
+        id: main
+        anchors.fill: parent
+
+        ColumnLayout {
+            id: data
+
+            VulkanView {
+                id: renderer
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.minimumWidth: 1000
+                Layout.minimumHeight: 600
             }
 
-            RosTopicsView{
-                id: topics
-                width: 600
-                height: 1000
+            DataTableView {
+                id: dataTable
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.minimumWidth: 1000
+                Layout.minimumHeight: 400
             }
+        }
+
+        RosTopicsView{
+            id: topics
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.minimumWidth: 600
+            Layout.minimumHeight: 1000
+            Layout.maximumWidth: 1000
         }
     }
 }

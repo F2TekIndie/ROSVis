@@ -40,7 +40,7 @@ void VulkanView::sync(){
         // would render the squircle on top (overlay).
         connect(window(), &QQuickWindow::afterRenderPassRecording, renderer_, &Renderer::mainPassRecordingStart, Qt::DirectConnection);
     }
-    renderer_->setViewportSize( position(), size() );
+    renderer_->setViewportSize( position(), size()*window()->devicePixelRatio() );
     renderer_->setWindow(window());
 }
 
