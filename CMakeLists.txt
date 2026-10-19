@@ -39,7 +39,7 @@ qt_add_executable(rosvis
     renderer/renderer.cpp renderer/renderer.h
     ui/vulkanview.cpp ui/vulkanview.h
     renderer/shaders.h renderer/shaders.cpp renderer/scene.h renderer/scene.cpp renderer/mesh.h renderer/mesh.cpp
-    ros2/adapter.h ros2/adapter.cpp
+    ros2/uiadapter.h ros2/uiadapter.cpp ros2/rosadapter.h ros2/rosadapter.cpp ros2/data.h
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
