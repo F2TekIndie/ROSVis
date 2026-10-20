@@ -28,6 +28,7 @@ public:
 
     std::string MakeCommand();
     void SendCommand( std::string sCmd );
+    void HandleData( std::string sData );
 
     //
     boost::asio::io_context& ioCtx();

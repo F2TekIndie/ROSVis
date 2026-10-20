@@ -1,8 +1,10 @@
 
 #include "client.h"
 #include "ros2/rosadapter.h"
-#include <boost/asio/io_context.hpp>
 #include <thread>
+#include <iostream>
+#include <chrono>
+#include <boost/asio/io_context.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/experimental/concurrent_channel.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
@@ -12,6 +14,7 @@
 //
 namespace{
     using namespace boost::asio::experimental::awaitable_operators;
+    using namespace std::chrono_literals;
 
     // --- Reader: pulls from socket, pushes to channel ---
     boost::asio::awaitable<void> reader(boost::asio::ip::tcp::socket& sock, MyChannelType& ch) {
@@ -19,9 +22,9 @@ namespace{
             boost::asio::streambuf buf;
             while (true) {
                 buf.consume(buf.size());
-                auto [ec, n] = co_await boost::asio::async_read_until(
-                    sock, buf, '\n', boost::asio::as_tuple(boost::asio::use_awaitable));
-                if (ec) break;
+                auto [ec, n] = co_await boost::asio::async_read_until( sock, buf, '\n', boost::asio::as_tuple(boost::asio::use_awaitable));
+                if ( ec )
+                    break;
                 auto line = std::string(static_cast<const char*>(buf.data().data()), n);
                 co_await ch.async_send(boost::system::error_code{},std::move(line), boost::asio::use_awaitable);
             }
@@ -57,11 +60,27 @@ namespace{
         // Move to thread
         ctx.run();
     }
+
+    void receiveData( rosadapter& server ){
+        auto& cmdCh = server.dataChannel();
+        cmdCh.async_receive(
+            [&](boost::system::error_code ec, std::string sMsg){
+                if ( !ec ){
+                    // Messages are terminated with new line.
+                    // Needs to be stripped for valid command.
+                    server.HandleData( sMsg.substr(0, sMsg.size()-1) );
+                }
+                if ( !server.ioCtx().stopped() ){
+                    receiveData( server );
+                }
+        });
+    }
 }
 
 //
 namespace Client{
     std::jthread tWorker;
+    std::jthread tReceiverParser;
     //
     void start( rosadapter* server ){
         Q_ASSERT( server );
@@ -73,6 +92,7 @@ namespace Client{
         boost::asio::co_spawn( ctx, client(ctx, endpoint, server), boost::asio::detached);
 
         tWorker = std::jthread( runAsioCommunication, std::ref( ctx ) );
+        tReceiverParser = std::jthread( receiveData, std::ref(*server) );
     }
     //
     void stop( rosadapter* server ){
@@ -80,7 +100,8 @@ namespace Client{
         // Close connections
         // Stop listening
         server->ioCtx().stop();
-        tWorker.join();   
+        tWorker.join();
+        tReceiverParser.join();
     }
     //
     void loadConfiguration( rosadapter* server ){

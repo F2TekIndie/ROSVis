@@ -24,15 +24,19 @@ rosadapter::~rosadapter()
 /*
  */
 std::string rosadapter::MakeCommand(){
-    std::string sCmd = {"TopicsQuery"};
+    std::string sCmd = {"TopicsQuery\n"};
     return sCmd;
 }
 void rosadapter::SendCommand( std::string sCommand ){
     _cmdChannel.async_send( boost::system::error_code{}, std::move(sCommand), [](boost::system::error_code ec){
-        std::cout << "Command send: " << ec << std::endl;
+        if ( ec ){
+            std::cout << "Error while sending message: " << ec << std::endl;
+        }
     });
 }
-
+void rosadapter::HandleData( std::string sData ){
+    ;
+}
 
 /*
  */
