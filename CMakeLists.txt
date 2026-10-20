@@ -40,7 +40,7 @@ qt_add_executable(rosvis
     renderer/renderer.cpp renderer/renderer.h
     ui/vulkanview.cpp ui/vulkanview.h
     renderer/shaders.h renderer/shaders.cpp renderer/scene.h renderer/scene.cpp renderer/mesh.h renderer/mesh.cpp
-    ros2/uiadapter.h ros2/uiadapter.cpp ros2/rosadapter.h ros2/rosadapter.cpp ros2/data.h
+    ros2/uiadapter.h ros2/uiadapter.cpp ros2/rosadapter.h ros2/rosadapter.cpp ros2/data.h ros2/client.cpp ros2/client.h ros2/rosadapterconfig.h
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -66,6 +66,7 @@ target_link_libraries(rosvis PRIVATE
 
 target_include_directories(rosvis PRIVATE
     ui
+    ros2
 )
 
 set_source_files_properties(Style.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
@@ -74,10 +75,9 @@ qt_add_qml_module(rosvis
     URI ROSVis
     VERSION 1.0
     QML_FILES ui/DataTableView.qml ui/Main.qml ui/RosTopicsView.qml ui/Style.qml
-    SOURCES ui/vulkanview.cpp ui/vulkanview.h
+    SOURCES ui/vulkanview.cpp ui/vulkanview.h ros2/uiadapter.h ros2/uiadapter.cpp
     RESOURCE_PREFIX /ros2
     NO_RESOURCE_TARGET_PATH
-    SOURCES ros2/client.h ros2/client.cpp
 )
 
 set(SHADER_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/shader)

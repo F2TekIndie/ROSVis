@@ -7,6 +7,7 @@ import ROSVis
 ApplicationWindow {
     id: root
     visible: true
+    required property UIAdapter rossy
 
     menuBar: MenuBar{
         id: menu
@@ -69,6 +70,9 @@ ApplicationWindow {
 
                 RosTopicsView{
                     id: topicsTab
+                    onVisibleChanged: {
+                        rossy.getTopics()
+                    }
                 }
 
                 Rectangle{

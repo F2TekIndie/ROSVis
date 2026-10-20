@@ -2,12 +2,12 @@
 #ifndef ROSADAPTER_H
 #define ROSADAPTER_H
 
+#include <QObject>
 #include <boost/asio.hpp>
 #include <boost/asio/experimental/concurrent_channel.hpp>
 #include <boost/asio/io_context.hpp>
-#include <map>
-#include <QString>
-#include "ros2/data.h"
+#include "rosadapterconfig.h"
+
 
 
 //
@@ -18,23 +18,31 @@ typedef typename boost::asio::experimental::concurrent_channel<void(boost::syste
  * Receive command responses
  * Receive ros2 data (DDS) from ROSAdapter
  */
-class rosadapter
+class rosadapter : public QObject
 {
+    Q_OBJECT
+
 public:
     rosadapter();
     ~rosadapter();
+
+    std::string MakeCommand();
+    void SendCommand( std::string sCmd );
 
     //
     boost::asio::io_context& ioCtx();
     MyChannelType& cmdChannel();
     MyChannelType& dataChannel();
+    //
+    rosadapterconfig& config();
 
 private:
-    std::map< QString, std::shared_ptr<Data> > _topicData = {};
     //
     boost::asio::io_context _ioCtx;
     MyChannelType           _cmdChannel;
     MyChannelType           _dataChannel;
+    //
+    rosadapterconfig    _config;
 };
 
 #endif // ROSADAPTER_H

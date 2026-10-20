@@ -11,6 +11,7 @@ class rosadapter;
 namespace Client{
     void start( rosadapter* server );
     void stop( rosadapter* server );
+    void loadConfiguration( rosadapter* server );
 };
 
 

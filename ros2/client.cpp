@@ -48,7 +48,7 @@ namespace{
         auto& cmdCh = server->cmdChannel();
         auto& dataCh = server->dataChannel();
         // Run reader and writer in parallel; await BOTH completing
-        co_await (reader(socket, cmdCh) && writer(socket, dataCh));
+        co_await (reader(socket, dataCh) && writer(socket, cmdCh));
         //
         socket.close();
     }
@@ -68,7 +68,8 @@ namespace Client{
         // IP & PORT
         // Start connection
         boost::asio::io_context& ctx = server->ioCtx();
-        auto endpoint = boost::asio::ip::tcp::endpoint( boost::asio::ip::make_address("127.0.0.1"), 8080 );
+        rosadapterconfig& config = server->config();
+        auto endpoint = boost::asio::ip::tcp::endpoint( boost::asio::ip::make_address( config.sIp ), config.nPort );
         boost::asio::co_spawn( ctx, client(ctx, endpoint, server), boost::asio::detached);
 
         tWorker = std::jthread( runAsioCommunication, std::ref( ctx ) );
@@ -79,6 +80,14 @@ namespace Client{
         // Close connections
         // Stop listening
         server->ioCtx().stop();
-        tWorker.join();
+        tWorker.join();   
+    }
+    //
+    void loadConfiguration( rosadapter* server ){
+        Q_ASSERT( server );
+        //
+        rosadapterconfig& config = server->config();
+        //
+        ;
     }
 };
