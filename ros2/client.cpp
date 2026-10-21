@@ -68,7 +68,8 @@ namespace{
                 if ( !ec ){
                     // Messages are terminated with new line.
                     // Needs to be stripped for valid command.
-                    server.HandleData( sMsg.substr(0, sMsg.size()-1) );
+                    std::string sMessage = sMsg.substr(0, sMsg.size()-1);
+                    server.HandleData( sMessage );
                 }
                 if ( !server.ioCtx().stopped() ){
                     receiveData( server );

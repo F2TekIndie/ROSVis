@@ -2,9 +2,37 @@
 #include "rosadapter.h"
 #include "client.h"
 #include <iostream>
+#include <algorithm>
 
 
 
+//
+namespace{
+    //
+    const std::vector<std::string> cCommandString = {"Invalid","TopicsQuery","Subscribe","Unsubscribe"};
+    //
+    int getCommand( std::string_view sData ){
+        // Extract command
+        std::string sCommand = {""};
+        {
+            auto nIdx = sData.find( "||" );
+            if ( nIdx != std::string::npos ){
+                sCommand = sData.substr( 0, nIdx );
+            }
+        }
+        // Find index
+        auto findIt = std::find_if( cCommandString.begin(), cCommandString.end(), [&sCommand](std::string const& rhs){
+            return rhs == sCommand;
+        });
+        //
+        if ( findIt == cCommandString.end() ){
+            return 0;
+        }
+        return std::distance( cCommandString.begin(), findIt );
+    }
+}
+
+//
 rosadapter::rosadapter()
     :_ioCtx()
     ,_cmdChannel( _ioCtx.get_executor() )
@@ -23,8 +51,10 @@ rosadapter::~rosadapter()
 
 /*
  */
-std::string rosadapter::MakeCommand(){
-    std::string sCmd = {"TopicsQuery\n"};
+std::string rosadapter::MakeCommand( int nCmd ){
+    Q_ASSERT( nCmd >= 0 && nCmd < cCommandString.size() );
+    //
+    std::string sCmd = cCommandString[ nCmd ] + "\n";
     return sCmd;
 }
 void rosadapter::SendCommand( std::string sCommand ){
@@ -34,8 +64,13 @@ void rosadapter::SendCommand( std::string sCommand ){
         }
     });
 }
-void rosadapter::HandleData( std::string sData ){
+void rosadapter::HandleData( std::string_view sData ){
+    // Get command
+    int nCmd = getCommand( sData );
+    // Store data for command
     ;
+    // Notify UI of new data
+    emit newDataAvailable( nCmd );
 }
 
 /*

@@ -7,18 +7,20 @@
 
 
 
-UIAdapter::UIAdapter()
-    :QObject()
+UIAdapter::UIAdapter(QObject* parent)
+    :QObject(parent)
 {
     _rosadapter.reset( new rosadapter() );
+    //
+    connect( _rosadapter.get(), &rosadapter::newDataAvailable, this, &UIAdapter::getData );
 }
 
-void UIAdapter::getTopics(){
-    std::string sCmd = _rosadapter->MakeCommand();
+void UIAdapter::sendCommand( UIAdapter::ROS_CMD nCmd ){
+    std::string sCmd = _rosadapter->MakeCommand( static_cast<int>(nCmd) );
     _rosadapter->SendCommand( sCmd );
 }
 
-QVariant UIAdapter::getData(const QString& sTopic){
-    QVariant bob(123);
-    return bob;
+void UIAdapter::getData( int nCmd ){
+    //
+    //auto xxx = _rosadapter->GetData();
 }

@@ -71,7 +71,7 @@ ApplicationWindow {
                 RosTopicsView{
                     id: topicsTab
                     onVisibleChanged: {
-                        rossy.getTopics()
+                        rossy.sendCommand( UIAdapter.RC_GET_TOPICS )
                     }
                 }
 

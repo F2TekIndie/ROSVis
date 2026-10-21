@@ -26,9 +26,9 @@ public:
     rosadapter();
     ~rosadapter();
 
-    std::string MakeCommand();
+    std::string MakeCommand( int nCmd );
     void SendCommand( std::string sCmd );
-    void HandleData( std::string sData );
+    void HandleData( std::string_view sData );
 
     //
     boost::asio::io_context& ioCtx();
@@ -36,6 +36,9 @@ public:
     MyChannelType& dataChannel();
     //
     rosadapterconfig& config();
+
+signals:
+    void newDataAvailable( int nCmd );
 
 private:
     //
