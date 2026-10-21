@@ -4,9 +4,11 @@
 #include <boost/asio.hpp>
 #include <QVariant>
 #include "rosadapter.h"
+#include "data.h"
 
 
 
+//
 UIAdapter::UIAdapter(QObject* parent)
     :QObject(parent)
 {
@@ -22,5 +24,10 @@ void UIAdapter::sendCommand( UIAdapter::ROS_CMD nCmd ){
 
 void UIAdapter::getData( int nCmd ){
     //
-    //auto xxx = _rosadapter->GetData();
+    auto xxx = _rosadapter->GetData( nCmd );
+    // Hack me
+    auto pData = dynamic_cast<DataTopics*>( xxx.get() );
+    for ( auto& entry : pData->_topics ){
+        emit newTopic( QString::fromStdString( entry ) );
+    }
 }

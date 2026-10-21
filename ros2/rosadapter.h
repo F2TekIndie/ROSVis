@@ -13,6 +13,9 @@
 //
 typedef typename boost::asio::experimental::concurrent_channel<void(boost::system::error_code, std::string)> MyChannelType;
 
+//
+struct Data;
+
 /*
  * Send commands to ROSAdapter
  * Receive command responses
@@ -37,6 +40,9 @@ public:
     //
     rosadapterconfig& config();
 
+    //
+    std::shared_ptr<Data> GetData( int nCmd );
+
 signals:
     void newDataAvailable( int nCmd );
 
@@ -47,6 +53,8 @@ private:
     MyChannelType           _dataChannel;
     //
     rosadapterconfig    _config;
+    //
+    std::map< int, std::shared_ptr<Data> > _dataContainer = {};
 };
 
 #endif // ROSADAPTER_H

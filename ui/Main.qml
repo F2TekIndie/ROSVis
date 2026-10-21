@@ -71,7 +71,15 @@ ApplicationWindow {
                 RosTopicsView{
                     id: topicsTab
                     onVisibleChanged: {
-                        rossy.sendCommand( UIAdapter.RC_GET_TOPICS )
+                        if ( topicsTab.visible ) {
+                            rossy.sendCommand( UIAdapter.RC_GET_TOPICS )
+                        }
+                    }
+                    Connections{
+                        target: rossy
+                        function onNewTopic( topic ){
+                            topicsTab.addTopic( topic )
+                        }
                     }
                 }
 

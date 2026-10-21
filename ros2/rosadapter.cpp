@@ -1,15 +1,18 @@
 
 #include "rosadapter.h"
 #include "client.h"
+#include "data.h"
 #include <iostream>
 #include <algorithm>
+#include <QVariant>
 
 
 
 //
 namespace{
-    //
-    const std::vector<std::string> cCommandString = {"Invalid","TopicsQuery","Subscribe","Unsubscribe"};
+    // NEEDS SOME RETHINKING => PREFER one place to setup names, indices, function pointers to construct
+    // the whole send/receive and parse logic
+    const std::vector<std::string> cCommandString = {"Invalid","TopicsQuery","Subscribe","Unsubscribe","Data"};
     //
     int getCommand( std::string_view sData ){
         // Extract command
@@ -29,6 +32,31 @@ namespace{
             return 0;
         }
         return std::distance( cCommandString.begin(), findIt );
+    }
+    //
+    std::shared_ptr<Data> extractData( int nCmd, std::string_view sData ){
+        std::shared_ptr<Data> newDataContainer;
+        if ( cCommandString[nCmd] == "TopicsQuery" ){
+            DataTopics* pData = new DataTopics();
+            // Get starting point for topic search
+            auto nIdx = sData.find( "||" );
+            // Search topic
+            do{
+                auto nTopic = sData.find( ":", nIdx+2);
+                if ( nTopic != std::string::npos ){
+                    std::string_view sub = sData.substr( nIdx+2, nTopic-nIdx-2 );
+                    pData->_topics.push_back( std::string(sub) );
+                    //
+                    nIdx = sData.find( "||", nTopic+1 );
+                }
+                else{
+                    nIdx = std::string::npos;
+                }
+            }while( nIdx != std::string::npos );
+            //
+            newDataContainer.reset( pData );
+        }
+        return newDataContainer;
     }
 }
 
@@ -68,7 +96,7 @@ void rosadapter::HandleData( std::string_view sData ){
     // Get command
     int nCmd = getCommand( sData );
     // Store data for command
-    ;
+    _dataContainer[ nCmd ] = extractData( nCmd, sData );
     // Notify UI of new data
     emit newDataAvailable( nCmd );
 }
@@ -87,4 +115,8 @@ MyChannelType& rosadapter::dataChannel(){
 
 rosadapterconfig& rosadapter::config(){
     return _config;
+}
+
+std::shared_ptr<Data> rosadapter::GetData( int nCmd ){
+    return  _dataContainer[nCmd];
 }
