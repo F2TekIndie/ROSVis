@@ -23,7 +23,7 @@ namespace{
                 std::array<unsigned char, 4> header;
                 co_await boost::asio::async_read( sock, boost::asio::buffer(header), boost::asio::use_awaitable );
                 //
-                std::uint32_t size = (std::uint32_t(header[3])<<24) | (std::uint32_t(header[1]<<16)) | (std::uint32_t(header[2])<<8) | (std::uint32_t(header[3]));
+                std::uint32_t size = (std::uint32_t(header[0])<<24) | (std::uint32_t(header[1])<<16) | (std::uint32_t(header[2])<<8) | std::uint32_t(header[3]);
                 constexpr std::uint32_t maxSize = 16 * 1024 * 1024;
                 if ( size > maxSize ){
                     throw std::runtime_error("Message to long");
@@ -59,7 +59,7 @@ namespace{
                     boost::asio::buffer(msg)
                 };
                 // Transform or just echo
-                co_await boost::asio::async_write(sock, boost::asio::buffer(msg), boost::asio::use_awaitable);
+                co_await boost::asio::async_write(sock, buffers, boost::asio::use_awaitable);
             }
         } catch (const std::exception&) { /* connection closed */ }
     }
@@ -87,8 +87,6 @@ namespace{
         cmdCh.async_receive(
             [&](boost::system::error_code ec, std::string sMsg){
                 if ( !ec ){
-                    // Messages are terminated with new line.
-                    // Needs to be stripped for valid command.
                     server.HandleData( sMsg );
                 }
                 if ( !server.ioCtx().stopped() ){
@@ -110,7 +108,7 @@ namespace Client{
         boost::asio::io_context& ctx = server->ioCtx();
         rosadapterconfig& config = server->config();
         auto endpoint = boost::asio::ip::tcp::endpoint( boost::asio::ip::make_address( config.sIp ), config.nPort );
-        boost::asio::co_spawn( ctx, client(ctx, endpoint, server), boost::asio::detached);
+        boost::asio::co_spawn(ctx, client(ctx, endpoint, server), boost::asio::detached);
 
         tWorker = std::jthread( runAsioCommunication, std::ref( ctx ) );
         tReceiverParser = std::jthread( receiveData, std::ref(*server) );
