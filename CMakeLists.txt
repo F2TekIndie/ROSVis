@@ -33,6 +33,11 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick)
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(Threads REQUIRED)
 
+add_subdirectory(
+    "${CMAKE_CURRENT_SOURCE_DIR}/../ROSData"
+    "${CMAKE_CURRENT_BINARY_DIR}/rosdata"
+)
+
 qt_standard_project_setup(REQUIRES 6.12)
 
 qt_add_executable(rosvis
@@ -40,7 +45,7 @@ qt_add_executable(rosvis
     renderer/renderer.cpp renderer/renderer.h
     ui/vulkanview.cpp ui/vulkanview.h
     renderer/shaders.h renderer/shaders.cpp renderer/scene.h renderer/scene.cpp renderer/mesh.h renderer/mesh.cpp
-    ros2/uiadapter.h ros2/uiadapter.cpp ros2/rosadapter.h ros2/rosadapter.cpp ros2/data.h ros2/client.cpp ros2/client.h ros2/rosadapterconfig.h
+    ros2/uiadapter.h ros2/uiadapter.cpp ros2/rosadapter.h ros2/rosadapter.cpp  ros2/client.cpp ros2/client.h ros2/rosadapterconfig.h
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -62,6 +67,7 @@ target_link_libraries(rosvis PRIVATE
     Vulkan::Vulkan
     Boost::system
     Threads::Threads
+    rosdata
 )
 
 target_include_directories(rosvis PRIVATE

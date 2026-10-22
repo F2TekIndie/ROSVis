@@ -4,7 +4,6 @@
 #include <boost/asio.hpp>
 #include <QVariant>
 #include "rosadapter.h"
-#include "data.h"
 
 
 
@@ -24,10 +23,20 @@ void UIAdapter::sendCommand( UIAdapter::ROS_CMD nCmd ){
 
 void UIAdapter::getData( int nCmd ){
     //
-    auto xxx = _rosadapter->GetData( nCmd );
-    // Hack me
-    auto pData = dynamic_cast<DataTopics*>( xxx.get() );
-    for ( auto& entry : pData->_topics ){
-        emit newTopic( QString::fromStdString( entry ) );
+    switch( nCmd ){
+        case RC_INVALID:
+            //auto xxx = _rosadapter->GetData( nCmd );
+            break;
+        case RC_GET_TOPICS:
+            //auto* pData = _rosadapter->GetData( nCmd );
+            //for ( auto& entry : pData->_topics )
+            //    emit newTopic( QString::fromStdString( entry ) );
+            break;
+        case RC_SUBSCRIBE:
+            //auto xxx = _rosadapter->GetData( nCmd );
+            break;
+        case RC_UNSUBSCRIBE:
+            //auto xxx = _rosadapter->GetData( nCmd );
+            break;
     }
 }

@@ -1,63 +1,15 @@
 
 #include "rosadapter.h"
 #include "client.h"
-#include "data.h"
 #include <iostream>
-#include <algorithm>
 #include <QVariant>
+#include "message.pb.h"
+#include "topicsRequest.pb.h"
 
 
 
 //
 namespace{
-    // NEEDS SOME RETHINKING => PREFER one place to setup names, indices, function pointers to construct
-    // the whole send/receive and parse logic
-    const std::vector<std::string> cCommandString = {"Invalid","TopicsQuery","Subscribe","Unsubscribe","Data"};
-    //
-    int getCommand( std::string_view sData ){
-        // Extract command
-        std::string sCommand = {""};
-        {
-            auto nIdx = sData.find( "||" );
-            if ( nIdx != std::string::npos ){
-                sCommand = sData.substr( 0, nIdx );
-            }
-        }
-        // Find index
-        auto findIt = std::find_if( cCommandString.begin(), cCommandString.end(), [&sCommand](std::string const& rhs){
-            return rhs == sCommand;
-        });
-        //
-        if ( findIt == cCommandString.end() ){
-            return 0;
-        }
-        return std::distance( cCommandString.begin(), findIt );
-    }
-    //
-    std::shared_ptr<Data> extractData( int nCmd, std::string_view sData ){
-        std::shared_ptr<Data> newDataContainer;
-        if ( cCommandString[nCmd] == "TopicsQuery" ){
-            DataTopics* pData = new DataTopics();
-            // Get starting point for topic search
-            auto nIdx = sData.find( "||" );
-            // Search topic
-            do{
-                auto nTopic = sData.find( ":", nIdx+2);
-                if ( nTopic != std::string::npos ){
-                    std::string_view sub = sData.substr( nIdx+2, nTopic-nIdx-2 );
-                    pData->_topics.push_back( std::string(sub) );
-                    //
-                    nIdx = sData.find( "||", nTopic+1 );
-                }
-                else{
-                    nIdx = std::string::npos;
-                }
-            }while( nIdx != std::string::npos );
-            //
-            newDataContainer.reset( pData );
-        }
-        return newDataContainer;
-    }
 }
 
 //
@@ -80,9 +32,27 @@ rosadapter::~rosadapter()
 /*
  */
 std::string rosadapter::MakeCommand( int nCmd ){
-    Q_ASSERT( nCmd >= 0 && nCmd < cCommandString.size() );
+    robotics::Message msg;
+    msg.set_request_id( 1 );
     //
-    std::string sCmd = cCommandString[ nCmd ] + "\n";
+    switch( nCmd ){
+        case 1:
+            msg.mutable_topics_request();
+            break;
+        case 2:
+            msg.mutable_sub_request();
+            break;
+        case 3:
+            msg.mutable_unsub_request();
+            break;
+        case 4:
+            msg.mutable_exit_request();
+            break;
+        default:
+            break;
+    }
+    std::string sCmd;
+    msg.SerializeToString( &sCmd );
     return sCmd;
 }
 void rosadapter::SendCommand( std::string sCommand ){
@@ -92,11 +62,40 @@ void rosadapter::SendCommand( std::string sCommand ){
         }
     });
 }
-void rosadapter::HandleData( std::string_view sData ){
+void rosadapter::HandleData( std::string const& sData ){
     // Get command
-    int nCmd = getCommand( sData );
-    // Store data for command
-    _dataContainer[ nCmd ] = extractData( nCmd, sData );
+    robotics::Message msg;
+    if ( !msg.ParseFromString( sData ) ){
+        return;
+    }
+    //
+    int nCmd{0};
+    switch( msg.payload_case() ){
+        case robotics::Message::kTopicsResponse:
+        {
+            auto data = msg.topics_response();
+            // Notify UI of new data
+            emit newDataAvailable( 1 );
+            nCmd = 1;
+            break;
+        }
+        case robotics::Message::kSubResponse:
+        {
+            auto data = msg.sub_response();
+            // Notify UI of new data
+            emit newDataAvailable( 2 );
+            nCmd = 2;
+            break;
+        }
+        case robotics::Message::kUnsubResponse:
+        {
+            auto data = msg.unsub_response();
+            nCmd = 3;
+            break;
+        }
+        default:
+            break;
+    }
     // Notify UI of new data
     emit newDataAvailable( nCmd );
 }
@@ -115,8 +114,4 @@ MyChannelType& rosadapter::dataChannel(){
 
 rosadapterconfig& rosadapter::config(){
     return _config;
-}
-
-std::shared_ptr<Data> rosadapter::GetData( int nCmd ){
-    return  _dataContainer[nCmd];
 }
