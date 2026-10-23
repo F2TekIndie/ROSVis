@@ -31,21 +31,22 @@ rosadapter::~rosadapter()
 
 /*
  */
-std::string rosadapter::MakeCommand( int nCmd ){
+std::string rosadapter::MakeCommand( Commands::ROS_CMD nCmd ){
+    static uint64_t _nRequestId{0};
     robotics::Message msg;
-    msg.set_request_id( 1 );
+    msg.set_request_id( ++_nRequestId );
     //
     switch( nCmd ){
-        case 1:
+        case Commands::RC_GET_TOPICS:
             msg.mutable_topics_request();
             break;
-        case 2:
+        case Commands::RC_SUBSCRIBE:
             msg.mutable_sub_request();
             break;
-        case 3:
+        case Commands::RC_UNSUBSCRIBE:
             msg.mutable_unsub_request();
             break;
-        case 4:
+        case Commands::RC_EXIT:
             msg.mutable_exit_request();
             break;
         default:
@@ -69,35 +70,29 @@ void rosadapter::HandleData( std::string const& sData ){
         return;
     }
     //
-    int nCmd{0};
     switch( msg.payload_case() ){
         case robotics::Message::kTopicsResponse:
         {
             auto data = msg.topics_response();
-            // Notify UI of new data
-            emit newDataAvailable( 1 );
-            nCmd = 1;
+            for( auto& topic : data.topics() ){
+                QString sTopic = QString::fromStdString( topic.name() );
+                emit newTopic( sTopic );
+            }
             break;
         }
         case robotics::Message::kSubResponse:
         {
             auto data = msg.sub_response();
-            // Notify UI of new data
-            emit newDataAvailable( 2 );
-            nCmd = 2;
             break;
         }
         case robotics::Message::kUnsubResponse:
         {
             auto data = msg.unsub_response();
-            nCmd = 3;
             break;
         }
         default:
             break;
     }
-    // Notify UI of new data
-    emit newDataAvailable( nCmd );
 }
 
 /*

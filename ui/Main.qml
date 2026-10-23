@@ -7,6 +7,8 @@ import ROSVis
 ApplicationWindow {
     id: root
     visible: true
+    color: "#202830"
+
     required property UIAdapter rossy
 
     menuBar: MenuBar{
@@ -70,22 +72,14 @@ ApplicationWindow {
 
                 RosTopicsView{
                     id: topicsTab
-                    onVisibleChanged: {
-                        if ( topicsTab.visible ) {
-                            rossy.sendCommand( UIAdapter.RC_GET_TOPICS )
-                        }
-                    }
-                    Connections{
-                        target: rossy
-                        function onNewTopic( topic ){
-                            topicsTab.addTopic( topic )
-                        }
-                    }
+                    adapter: root.rossy
                 }
 
                 Rectangle{
                     id: moretopicsTab
-                    color: "green"
+                    color: "#2A3540"
+                    border.color: "#4A5B6B"
+                    radius: 10
                 }
             }
         }

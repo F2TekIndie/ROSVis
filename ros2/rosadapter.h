@@ -7,6 +7,7 @@
 #include <boost/asio/experimental/concurrent_channel.hpp>
 #include <boost/asio/io_context.hpp>
 #include "rosadapterconfig.h"
+#include "commands.h"
 
 
 
@@ -23,12 +24,11 @@ typedef typename boost::asio::experimental::concurrent_channel<void(boost::syste
 class rosadapter : public QObject
 {
     Q_OBJECT
-
 public:
     rosadapter();
     ~rosadapter();
 
-    std::string MakeCommand( int nCmd );
+    std::string MakeCommand( Commands::ROS_CMD nCmd );
     void SendCommand( std::string sCmd );
     void HandleData( std::string const& sData );
 
@@ -40,7 +40,7 @@ public:
     rosadapterconfig& config();
 
 signals:
-    void newDataAvailable( int nCmd );
+    void newTopic( const QString &sTopic );
 
 private:
     //
