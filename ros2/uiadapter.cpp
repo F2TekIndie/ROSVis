@@ -24,3 +24,15 @@ void UIAdapter::sendCommand( Commands::ROS_CMD nCmd ){
 void UIAdapter::handleNewTopic( const QString& sTopic ){
     emit newTopic( sTopic );
 }
+
+QString UIAdapter::currentTopic() const{
+    return _currTopic;
+}
+
+void UIAdapter::setCurrentTopic( const QString& sTopic ){
+    if ( _currTopic == sTopic ){
+        return;
+    }
+    _currTopic = sTopic;
+    emit currentTopicChanged( _currTopic );
+}

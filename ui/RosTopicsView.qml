@@ -50,52 +50,12 @@ Rectangle {
             policy: ScrollBar.AsNeeded
         }
 
-        delegate: ItemDelegate {
-            id: row
-
-            required property string topicName
-            required property int index
-
-            width: ListView.view.width
-            height: 44
-            hoverEnabled: true
-
-            onClicked: topicsList.currentIndex = index
-
-            background: Rectangle {
-                radius: 6
-
-                color: row.highlighted ? "#42596B"
-                     : row.hovered     ? "#354350"
-                                       : "transparent"
-
-                border.width: row.highlighted ? 1 : 0
-                border.color: "#7FA6C2"
-
-                Behavior on color {
-                    ColorAnimation { duration: 120 }
-                }
+        delegate: RosTopicsViewItem {
+            onClicked: {
+                topicsList.currentIndex = index
+                const topic = topicsModel.get( index ).topicName
+                root.adapter.currentTopic = topic
             }
-
-            highlighted: topicsList.currentIndex === index
-
-            contentItem: Label {
-                text: row.topicName
-                color: row.highlighted ? "#FFFFFF" : "#DCE4EB"
-                font.pixelSize: 14
-                verticalAlignment: Text.AlignVCenter
-                elide: Text.ElideMiddle
-            }
-
-            leftPadding: 12
-            rightPadding: 12
-
-            ToolTip.visible: hovered && topicLabelTruncated
-            ToolTip.text: topicName
-            ToolTip.delay: 700
-
-            readonly property bool topicLabelTruncated:
-                contentItem.truncated
         }
     }
 }

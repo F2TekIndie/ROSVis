@@ -80,7 +80,7 @@ set_source_files_properties(Style.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 qt_add_qml_module(rosvis
     URI ROSVis
     VERSION 1.0
-    QML_FILES ui/DataTableView.qml ui/Main.qml ui/RosTopicsView.qml ui/Style.qml
+    QML_FILES ui/DataTableView.qml ui/Main.qml ui/RosTopicsView.qml ui/RosTopicsViewItem.qml ui/Style.qml
     SOURCES ui/vulkanview.cpp ui/vulkanview.h ros2/uiadapter.h ros2/uiadapter.cpp ros2/commands.h
     RESOURCE_PREFIX /ros2
     NO_RESOURCE_TARGET_PATH

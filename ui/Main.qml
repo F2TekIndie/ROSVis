@@ -38,6 +38,7 @@ ApplicationWindow {
 
             DataTableView {
                 id: dataTable
+                adapter: root.rossy
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.minimumWidth: 1000
