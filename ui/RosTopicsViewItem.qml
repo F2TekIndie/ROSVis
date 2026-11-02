@@ -1,11 +1,16 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
+
+
 
 ItemDelegate {
     id: row
 
     required property string topicName
     required property int index
+
+    signal subscriptionToggled(string topic, bool subscribed)
 
     width: ListView.view.width
     height: 44
@@ -28,13 +33,32 @@ ItemDelegate {
 
     highlighted: ListView.isCurrentItem
 
-    contentItem: Label {
-        id: topicLabel
-        text: row.topicName
-        color: row.highlighted ? "#FFFFFF" : "#DCE4EB"
-        font.pixelSize: 14
-        verticalAlignment: Text.AlignVCenter
-        elide: Text.ElideMiddle
+    contentItem: Item{
+        RowLayout{
+            Label {
+                id: topicLabel
+                text: row.topicName
+                color: row.highlighted ? "#FFFFFF" : "#DCE4EB"
+                font.pixelSize: 14
+                verticalAlignment: Text.AlignVCenter
+                elide: Text.ElideMiddle
+            }
+            CheckBox {
+                id: topicsub
+                text: qsTr("Subscribed")
+                checked: false
+
+                onToggled: row.subscriptionToggled( row.topicName, checked )
+
+                contentItem: Text {
+                    text: topicsub.text
+                    color: row.highlighted ? "#FFFFFF" : "#DCE4EB"
+                    font.pixelSize: 14
+                    verticalAlignment: Text.AlignVCenter
+                    leftPadding: topicsub.indicator ? topicsub.indicator.width + topicsub.spacing : 0
+                }
+            }
+        }
     }
 
     leftPadding: 12

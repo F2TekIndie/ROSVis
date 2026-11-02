@@ -56,6 +56,11 @@ Rectangle {
                 const topic = topicsModel.get( index ).topicName
                 root.adapter.currentTopic = topic
             }
+
+            onSubscriptionToggled: function(topic, subscribed){
+                root.adapter.currentTopic = topic
+                root.adapter.sendCommand( subscribed ? Commands.RC_SUBSCRIBE : Commands.RC_UNSUBSCRIBE )
+            }
         }
     }
 }

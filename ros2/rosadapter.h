@@ -3,6 +3,7 @@
 #define ROSADAPTER_H
 
 #include <QObject>
+#include <QVariantList>
 #include <boost/asio.hpp>
 #include <boost/asio/experimental/concurrent_channel.hpp>
 #include <boost/asio/io_context.hpp>
@@ -28,7 +29,7 @@ public:
     rosadapter();
     ~rosadapter();
 
-    std::string MakeCommand( Commands::ROS_CMD nCmd );
+    std::string MakeCommand( Commands::ROS_CMD nCmd, QVariantList args = {} );
     void SendCommand( std::string sCmd );
     void HandleData( std::string const& sData );
 

@@ -24,9 +24,10 @@ public:
     //
     UIAdapter(QObject* parent = nullptr);
     QString currentTopic() const;
+    //
+    Q_INVOKABLE void sendCommand( Commands::ROS_CMD nCmd );
 
 public slots:
-    void sendCommand( Commands::ROS_CMD nCmd );
     void setCurrentTopic( const QString& sTopic );
 
 private slots:

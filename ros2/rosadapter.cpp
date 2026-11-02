@@ -31,7 +31,7 @@ rosadapter::~rosadapter()
 
 /*
  */
-std::string rosadapter::MakeCommand( Commands::ROS_CMD nCmd ){
+std::string rosadapter::MakeCommand( Commands::ROS_CMD nCmd, QVariantList args ){
     static uint64_t _nRequestId{0};
     robotics::Message msg;
     msg.set_request_id( ++_nRequestId );
@@ -41,11 +41,20 @@ std::string rosadapter::MakeCommand( Commands::ROS_CMD nCmd ){
             msg.mutable_topics_request();
             break;
         case Commands::RC_SUBSCRIBE:
-            msg.mutable_sub_request();
+        {
+            Q_ASSERT( args.size() == 2 );
+            auto sub = msg.mutable_sub_request();
+            sub->set_topic( args[0].toString().toStdString() );
+            sub->set_type( args[1].toString().toStdString() );
             break;
+        }
         case Commands::RC_UNSUBSCRIBE:
-            msg.mutable_unsub_request();
+        {
+            Q_ASSERT( args.size() == 1 );
+            auto unsub = msg.mutable_unsub_request();
+            unsub->set_topic( args[0].toString().toStdString() );
             break;
+        }
         case Commands::RC_EXIT:
             msg.mutable_exit_request();
             break;
@@ -77,6 +86,8 @@ void rosadapter::HandleData( std::string const& sData ){
             for( auto& topic : data.topics() ){
                 QString sTopic = QString::fromStdString( topic.name() );
                 emit newTopic( sTopic );
+                // TODO: TYPE IS NOT KNOW YET. REFACTOR
+                //topic.types();
             }
             break;
         }

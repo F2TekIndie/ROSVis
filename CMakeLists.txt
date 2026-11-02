@@ -4,7 +4,7 @@ project(rosvis VERSION 0.1 LANGUAGES CXX)
 
 #
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 26)
 set(THIRD_PARTY_ROOT "/home/f2tek/SwDev" CACHE PATH "Root of third-party libraries")
 set(VULKAN_SDK_DEFAULT "${THIRD_PARTY_ROOT}/vulkansdk/x86_64")
 set(VULKAN_SDK "${VULKAN_SDK_DEFAULT}" CACHE PATH "LunarG Vulkan SDK root")
