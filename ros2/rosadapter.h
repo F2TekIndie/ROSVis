@@ -1,55 +1,38 @@
-
-#ifndef ROSADAPTER_H
-#define ROSADAPTER_H
+#pragma once
 
 #include <QObject>
 #include <QVariantList>
-#include <boost/asio.hpp>
-#include <boost/asio/experimental/concurrent_channel.hpp>
-#include <boost/asio/io_context.hpp>
-#include "rosadapterconfig.h"
+#include <QThread>
+#include <QStringList>
+#include "adapter.grpc.pb.h"
+#include "rosdata/schema.h"
 #include "commands.h"
-
-
+#include "rosadapterconfig.h"
 
 //
-typedef typename boost::asio::experimental::concurrent_channel<void(boost::system::error_code, std::string)> MyChannelType;
-
-
-
-/*
- * Send commands to ROSAdapter
- * Receive command responses
- * Receive ros2 data (DDS) from ROSAdapter
- */
-class rosadapter : public QObject
-{
+class rosadapter : public QObject{
     Q_OBJECT
 public:
-    rosadapter();
-    ~rosadapter();
-
-    std::string MakeCommand( Commands::ROS_CMD nCmd, QVariantList args = {} );
-    void SendCommand( std::string sCmd );
-    void HandleData( std::string const& sData );
-
+    explicit rosadapter( const rosadapterconfig& config = {} );
+    ~rosadapter() override;
     //
-    boost::asio::io_context& ioCtx();
-    MyChannelType& cmdChannel();
-    MyChannelType& dataChannel();
-    //
-    rosadapterconfig& config();
+    void sendCommand( Commands::ROS_CMD command, const QString& topic = {}, const QString& type = {} );
+    void getLatest( const QString& topic );
+    void getSchemas();
 
 signals:
-    void newTopic( const QString &sTopic );
+    void topicsReceived( const QVariantList& topics );
+    void subscriptionChanged( const QString& topic, bool subscribed );
+    void latestReceived( const QString& topic, const QVariantMap& data );
+    void schemas( const QVariantList& schemas );
+    void errorOccurred( const QString& message );
 
 private:
+    void report( const grpc::Status& status );
+    bool loadSchema( const std::string& type ); // Called on the worker thread.
     //
-    boost::asio::io_context _ioCtx;
-    MyChannelType           _cmdChannel;
-    MyChannelType           _dataChannel;
-    //
-    rosadapterconfig    _config;
+    rosdata::SchemaRegistry schemas_;
+    QThread worker_;
+    QObject* workerContext_;
+    std::unique_ptr<robotics::ROSAdapter::Stub> stub_;
 };
-
-#endif // ROSADAPTER_H

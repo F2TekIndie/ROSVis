@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.16)
 
 project(rosvis VERSION 0.1 LANGUAGES CXX)
 
+option(ROSVIS_CLIENT_TESTS_ONLY "Build only the ROS-free gRPC client tests" OFF)
+if(ROSVIS_CLIENT_TESTS_ONLY)
+    enable_testing()
+    add_subdirectory(tests)
+    return()
+endif()
+
 #
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 26)
@@ -30,7 +37,6 @@ find_package(Vulkan REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick)
 
 #
-find_package(Boost REQUIRED COMPONENTS system)
 find_package(Threads REQUIRED)
 
 add_subdirectory(
@@ -45,7 +51,7 @@ qt_add_executable(rosvis
     renderer/renderer.cpp renderer/renderer.h
     ui/vulkanview.cpp ui/vulkanview.h
     renderer/shaders.h renderer/shaders.cpp renderer/scene.h renderer/scene.cpp renderer/mesh.h renderer/mesh.cpp
-    ros2/uiadapter.h ros2/uiadapter.cpp ros2/rosadapter.h ros2/rosadapter.cpp  ros2/client.cpp ros2/client.h ros2/rosadapterconfig.h ros2/commands.h
+    ros2/uiadapter.h ros2/uiadapter.cpp ros2/rosadapter.h ros2/rosadapter.cpp ros2/rosadapterconfig.h ros2/commands.h
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -65,7 +71,6 @@ target_link_libraries(rosvis PRIVATE
     Qt6::Qml
     Qt6::Quick
     Vulkan::Vulkan
-    Boost::system
     Threads::Threads
     rosdata
 )
@@ -84,6 +89,8 @@ qt_add_qml_module(rosvis
     SOURCES ui/vulkanview.cpp ui/vulkanview.h ros2/uiadapter.h ros2/uiadapter.cpp ros2/commands.h
     RESOURCE_PREFIX /ros2
     NO_RESOURCE_TARGET_PATH
+    QML_FILES ui/RosSchemaView.qml
+    QML_FILES ui/RosSchemaViewItem.qml
 )
 
 set(SHADER_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/shader)

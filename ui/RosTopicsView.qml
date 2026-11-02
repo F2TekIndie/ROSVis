@@ -20,15 +20,21 @@ Rectangle {
         }
     }
 
-    function addTopic(topic){
-        topicsModel.append( {topicName: topic} );
-    }
-
     Connections {
         target: root.adapter
 
-        function onNewTopic(topic) {
-            root.addTopic(topic)
+        function onTopicsReceived(topics) {
+            topicsModel.clear()
+            for ( const topic of topics )
+                topicsModel.append( topic )
+        }
+        function onSubscriptionChanged(topic, subscribed) {
+            for (let i = 0; i < topicsModel.count; ++i)
+                if (topicsModel.get(i).topicName === topic)
+                    topicsModel.setProperty(i, "subscribed", subscribed)
+        }
+        function onErrorOccurred(message) {
+            console.warn("ROSAdapter: " + message)
         }
     }
 

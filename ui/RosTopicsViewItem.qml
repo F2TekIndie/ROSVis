@@ -9,6 +9,8 @@ ItemDelegate {
 
     required property string topicName
     required property int index
+    required property bool subscribed
+    required property var topicTypes
 
     signal subscriptionToggled(string topic, bool subscribed)
 
@@ -42,13 +44,19 @@ ItemDelegate {
                 font.pixelSize: 14
                 verticalAlignment: Text.AlignVCenter
                 elide: Text.ElideMiddle
+
+                ToolTip.text: "Available types: " + row.topicTypes.count
+                ToolTip.visible: hovered
             }
             CheckBox {
                 id: topicsub
                 text: qsTr("Subscribed")
-                checked: false
+                checked: row.subscribed
 
-                onToggled: row.subscriptionToggled( row.topicName, checked )
+                onToggled: {
+                    row.subscriptionToggled(row.topicName, checked)
+                    checked = Qt.binding(function() { return row.subscribed })
+                }
 
                 contentItem: Text {
                     text: topicsub.text

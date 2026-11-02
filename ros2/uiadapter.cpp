@@ -1,57 +1,61 @@
-
-
 #include "uiadapter.h"
-#include <boost/asio.hpp>
-#include <QVariant>
 #include "rosadapter.h"
 
 
 
 //
-UIAdapter::UIAdapter(QObject* parent)
-    :QObject(parent)
+UIAdapter::UIAdapter( QObject* parent )
+    :QObject( parent )
+    ,_rosadapter( std::make_shared<rosadapter>() )
 {
-    _rosadapter.reset( new rosadapter() );
-    //
-    connect( _rosadapter.get(), &rosadapter::newTopic, this, &UIAdapter::handleNewTopic );
+    connect( _rosadapter.get(), &rosadapter::topicsReceived, this, [this]( const QVariantList& topics ){
+        _types.clear();
+        for ( const auto& value : topics ){
+            const auto entry = value.toMap();
+            _types.insert( entry.value( "topicName" ).toString(), entry.value( "topicTypes" ).toStringList() );
+        }
+        emit topicsReceived( topics );
+    } );
+    connect( _rosadapter.get(), &rosadapter::subscriptionChanged, this, &UIAdapter::subscriptionChanged );
+    connect( _rosadapter.get(), &rosadapter::latestReceived, this, &UIAdapter::latestReceived );
+    connect( _rosadapter.get(), &rosadapter::schemas, this, &UIAdapter::schemas );
+    connect( _rosadapter.get(), &rosadapter::errorOccurred, this, &UIAdapter::errorOccurred );
 }
 
-void UIAdapter::sendCommand( Commands::ROS_CMD nCmd ){
-    std::string sCmd{ "" };
-    switch( nCmd ){
-        case Commands::RC_GET_TOPICS:
-            sCmd = _rosadapter->MakeCommand( nCmd );
-            break;
-        case Commands::RC_SUBSCRIBE:
-        {
-            // TODO: TYPE IS NOT KNOW YET. REFACTOR
-            sCmd = _rosadapter->MakeCommand( nCmd, {_currTopic, "String"} );
-            break;
+//
+void UIAdapter::sendCommand( Commands::ROS_CMD command ){
+    QString type;
+    if ( command == Commands::RC_SUBSCRIBE ){
+        const auto types = _types.value( _currTopic );
+        if ( types.size() != 1 ){
+            emit errorOccurred( "Select a topic with exactly one advertised type" );
+            return;
         }
-        case Commands::RC_UNSUBSCRIBE:
-        {
-            // TODO: TYPE IS NOT KNOW YET. REFACTOR
-            sCmd = _rosadapter->MakeCommand( nCmd, {_currTopic} );
-            break;
-        }
-        default:
-            break;
+        type = types.front();
     }
-    _rosadapter->SendCommand( sCmd );
+    _rosadapter->sendCommand( command, _currTopic, type );
 }
 
-void UIAdapter::handleNewTopic( const QString& sTopic ){
-    emit newTopic( sTopic );
+//
+void UIAdapter::getLatest(){
+    _rosadapter->getLatest( _currTopic );
 }
 
+//
 QString UIAdapter::currentTopic() const{
     return _currTopic;
 }
 
-void UIAdapter::setCurrentTopic( const QString& sTopic ){
-    if ( _currTopic == sTopic ){
+//
+void UIAdapter::setCurrentTopic( const QString& topic ){
+    if ( _currTopic == topic ){
         return;
     }
-    _currTopic = sTopic;
-    emit currentTopicChanged( _currTopic );
+    _currTopic = topic;
+    emit currentTopicChanged( topic );
+}
+
+//
+void UIAdapter::getSchemas(){
+    _rosadapter->getSchemas();
 }
