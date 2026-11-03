@@ -14,6 +14,26 @@ namespace{
     void deadline( grpc::ClientContext& context ){
         context.set_deadline( std::chrono::system_clock::now() + std::chrono::seconds( 2 ) );
     }
+
+    void collectBinaryFields( const google::protobuf::Descriptor& descriptor, const QString& prefix, QStringList& paths, int depth = 0 ){
+        if ( depth > 64 || paths.size() >= 4096 ){
+            return;
+        }
+        for ( int i = 0; i < descriptor.field_count(); ++i ){
+            const auto* field = descriptor.field( i );
+            auto path = prefix + QString::fromStdString( field->name() );
+            if ( field->is_repeated() ){
+                path += "[]";
+            }
+            if ( field->type() == google::protobuf::FieldDescriptor::TYPE_BYTES ){
+                paths.append( path );
+            }
+            else if ( field->cpp_type() == google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE ){
+                collectBinaryFields( *field->message_type(), path + ".", paths, depth + 1 );
+            }
+        }
+    }
+
 } // namespace
 
 //
@@ -172,6 +192,9 @@ void rosadapter::getLatest( const QString& topic ){
                 }
                 const auto fields = QJsonDocument::fromJson( QByteArray::fromStdString( json ) ).object().toVariantMap();
                 data.insert( "fields", fields );
+                QStringList binaryFields;
+                collectBinaryFields( *message->GetDescriptor(), {}, binaryFields );
+                data.insert( "binaryFields", binaryFields );
                 data.insert( "protobufType", QString::fromStdString( message->GetDescriptor()->full_name() ) );
                 // Preserve the scalar value convenience used by existing consumers.
                 if ( fields.size() == 1 && fields.contains( "data" ) ){

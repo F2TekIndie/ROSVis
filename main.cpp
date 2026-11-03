@@ -20,6 +20,8 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     UIAdapter uiAdapter;
     TopicDataModel data;
+    QObject::connect( &uiAdapter, &UIAdapter::currentTopicChanged, &data, &TopicDataModel::setCurrentTopic );
+    data.setCurrentTopic( uiAdapter.currentTopic() );
     QObject::connect( &uiAdapter, &UIAdapter::latestReceived, &data, &TopicDataModel::onLatestReceived );
     //
     engine.setInitialProperties({

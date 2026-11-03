@@ -114,3 +114,24 @@ The latestReceived data map contains `fields`, a nested map of ROS message field
 single-field data messages. Protobuf JSON represents binary buffers as base64 and
 64-bit integers as decimal strings, preserving precision when passed into QML.
 Dedicated image/point-cloud rendering remains separate from generic decoding.
+
+## Topic data inspector
+
+TopicDataModel exposes the selected topic as a read-only field list. Each row has
+fieldPath, displayValue, rawValue and valueKind roles. Nested message fields use
+dotted paths and small arrays use numeric indices. The latest sample per topic
+is cached locally so switching selection displays cached data immediately.
+Refresh remains manual. The view shows message type, sample sequence, receipt
+time, waiting states and conversion/request errors.
+
+Arrays expand up to arrayExpansionLimit (64 by default); larger arrays display
+their element count. Protobuf byte fields are identified using descriptors and
+shown as byte counts, preserving their original base64 value in rawValue.
+Traversal is limited to 4096 rows and 64 nesting levels, with explicit summaries
+when truncated. Long strings have shortened display text while rawValue retains
+the full value. Value-only changes use dataChanged; structural changes reset the
+visible list. All model changes occur on the GUI thread.
+
+The ROSVIS_CLIENT_TESTS_ONLY build also runs Qt model-consistency and offscreen
+QML inspector tests. The offscreen test writes a preview image to the system
+temporary directory as rosvis-topic-data-preview.png.

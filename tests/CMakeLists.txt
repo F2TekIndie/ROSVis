@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_AUTOMOC ON)
 
 #
-find_package(Qt6 REQUIRED COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Core Qml Test)
 
 add_subdirectory(
     "${CMAKE_CURRENT_SOURCE_DIR}/../../ROSData"
@@ -41,3 +41,24 @@ target_link_libraries(rosdata_schema_test PRIVATE
     rosdata
 )
 add_test(NAME rosdata_schema COMMAND rosdata_schema_test)
+
+add_executable(topicdata_model_test
+    topicdatamodel.cpp
+    ../ros2/topicdatamodel.cpp ../ros2/topicdatamodel.h
+)
+target_include_directories(topicdata_model_test PRIVATE ../ros2)
+target_link_libraries(topicdata_model_test PRIVATE Qt6::Core Qt6::Qml Qt6::Test)
+add_test(NAME topicdata_model COMMAND topicdata_model_test)
+
+find_package(Qt6 REQUIRED COMPONENTS Gui Quick)
+add_executable(topicdata_view_test
+    data_view.cpp
+    ../ros2/topicdatamodel.cpp ../ros2/topicdatamodel.h
+)
+target_include_directories(topicdata_view_test PRIVATE ../ros2)
+target_compile_definitions(topicdata_view_test PRIVATE
+    DATA_VIEW_SOURCE="${CMAKE_CURRENT_SOURCE_DIR}/../ui/DataTableView.qml"
+)
+target_link_libraries(topicdata_view_test PRIVATE Qt6::Gui Qt6::Quick Qt6::Test)
+add_test(NAME topicdata_view COMMAND topicdata_view_test)
+set_tests_properties(topicdata_view PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORMTHEME=;QT_QUICK_CONTROLS_STYLE=Basic")
