@@ -3,6 +3,7 @@
 #include <QQmlApplicationEngine>
 #include "ros2/uiadapter.h"
 #include "ros2/commands.h"
+#include "ros2/topicdatamodel.h"
 
 
 
@@ -18,9 +19,12 @@ int main(int argc, char *argv[])
     //
     QQmlApplicationEngine engine;
     UIAdapter uiAdapter;
+    TopicDataModel data;
+    QObject::connect( &uiAdapter, &UIAdapter::latestReceived, &data, &TopicDataModel::onLatestReceived );
     //
     engine.setInitialProperties({
-        {"rossy", QVariant::fromValue( &uiAdapter )}
+        {"rossy", QVariant::fromValue( &uiAdapter )},
+        {"dataModel", QVariant::fromValue( &data )}
     });
     engine.loadFromModule("ROSVis", "Main");
     //

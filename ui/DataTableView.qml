@@ -10,6 +10,7 @@ import Robotics.Commands 1.0
 Rectangle {
     id: root
     required property UIAdapter adapter
+    required property TopicDataModel dataModel
 
     color: "#2A3540"
     border.color: "#4A5B6B"
@@ -20,37 +21,39 @@ Rectangle {
         target: root.adapter
 
         function onCurrentTopicChanged(topic) {
-            if ( activeTopic.text !== topic )
-                dataModel.clear()
             activeTopic.text = "Active topic: " + topic
         }
-
-        function onLatestReceived( topic, data ){
-            dataModel.clear()
-            console.log( "Look at the data: " + data.count );
-        }
     }
 
-    ListModel{
-        id: dataModel
-    }
-    //
     ColumnLayout{
         anchors.fill: parent
         anchors.margins: 8
 
-        Label{
-            id: activeTopic
-            Layout.fillWidth: true
+        RowLayout{
             Layout.maximumHeight: 30
 
-            color: "red"
-            font.bold: true
-            text: "No topic selected"
+            Label{
+                id: activeTopic
+                Layout.fillWidth: true
+                Layout.maximumHeight: 30
+
+                color: "red"
+                font.bold: true
+                text: "No topic selected"
+            }
+            Button{
+                id: refreshData
+                text: "Refresh"
+
+                onClicked: {
+                    root.adapter.getLatest()
+                }
+            }
         }
+
         ListView{
             id: dataView
-            model: dataModel
+            model: root.dataModel
 
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -64,7 +67,7 @@ Rectangle {
 
             delegate: Label{
                 color: "red"
-                text: name
+                text: "Type of data " + type
             }
         }
     }

@@ -10,6 +10,7 @@ ApplicationWindow {
     color: "#202830"
 
     required property UIAdapter rossy
+    required property TopicDataModel dataModel
 
     menuBar: MenuBar{
         id: menu
@@ -39,6 +40,7 @@ ApplicationWindow {
             DataTableView {
                 id: dataTable
                 adapter: root.rossy
+                dataModel: root.dataModel
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.minimumWidth: 1000
