@@ -135,3 +135,35 @@ visible list. All model changes occur on the GUI thread.
 The ROSVIS_CLIENT_TESTS_ONLY build also runs Qt model-consistency and offscreen
 QML inspector tests. The offscreen test writes a preview image to the system
 temporary directory as rosvis-topic-data-preview.png.
+
+## Camera and lighting
+
+Scene owns a configurable Z-up perspective Camera and a directional Light.
+The initial camera is at (8, -10, 8), looking at (0, 0, 1), with a 45-degree
+vertical field of view and clipping distances 0.1 to 2000. Camera::viewProjection
+applies Vulkan's Y and depth corrections and uses the current viewport aspect.
+A directly overhead view automatically chooses a perpendicular image-up axis.
+C++ settings are accessible through Scene::camera() and Scene::light().
+
+Meshes have a base Color. The scene uses a blue-gray ground plane and an orange
+robot. Upload generates a flat normal for every triangle; the shader combines
+ambient light with directional Lambert diffuse lighting. Light::_dir describes
+the direction in which rays travel. Light strength, RGB color and ambient level
+are configurable. This first light implementation does not cast shadows.
+
+The renderer uses a 128-byte push-constant block for camera, light and mesh color,
+with depth testing and a viewport-local depth clear in Qt's main Vulkan pass.
+The CPU mesh positions remain unchanged.
+
+For the optional real Vulkan render check:
+
+```sh
+cmake -S . -B build/local -DROSVIS_RENDER_TESTS=ON
+cmake --build build/local --parallel
+cd build/local
+./renderer_smoke_test
+```
+
+It briefly opens a test window, verifies visible robot and ground pixels, and
+writes /tmp/rosvis-camera-light.png. The client-test configuration also provides
+scene_camera_test for projection, Vulkan clipping and overhead-view checks.

@@ -62,3 +62,14 @@ target_compile_definitions(topicdata_view_test PRIVATE
 target_link_libraries(topicdata_view_test PRIVATE Qt6::Gui Qt6::Quick Qt6::Test)
 add_test(NAME topicdata_view COMMAND topicdata_view_test)
 set_tests_properties(topicdata_view PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORMTHEME=;QT_QUICK_CONTROLS_STYLE=Basic")
+
+add_executable(scene_camera_test
+    camera.cpp
+    ../renderer/scene.cpp
+    ../renderer/camera.cpp ../renderer/camera.h ../renderer/light.h
+    ../renderer/mesh.cpp
+    ../renderer/meshfactory.cpp
+)
+target_include_directories(scene_camera_test PRIVATE ../renderer)
+target_link_libraries(scene_camera_test PRIVATE Qt6::Gui Qt6::Test)
+add_test(NAME scene_camera COMMAND scene_camera_test)

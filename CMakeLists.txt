@@ -53,6 +53,8 @@ qt_add_executable(rosvis
     renderer/shaders.h renderer/shaders.cpp renderer/scene.h renderer/scene.cpp renderer/mesh.h renderer/mesh.cpp
     ros2/uiadapter.h ros2/uiadapter.cpp ros2/rosadapter.h ros2/rosadapter.cpp ros2/rosadapterconfig.h ros2/commands.h
     ros2/topicdatamodel.h ros2/topicdatamodel.cpp
+    renderer/meshfactory.h renderer/meshfactory.cpp
+    renderer/camera.h renderer/camera.cpp renderer/light.h
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -139,3 +141,20 @@ qt_generate_deploy_qml_app_script(
     DEPLOY_USER_QML_MODULES_ON_UNSUPPORTED_PLATFORM
 )
 install(SCRIPT ${deploy_script})
+
+option(ROSVIS_RENDER_TESTS "Build the Vulkan camera/light smoke test" OFF)
+if(ROSVIS_RENDER_TESTS)
+    qt_add_executable(renderer_smoke_test
+        tests/renderer_smoke.cpp
+        renderer/renderer.cpp renderer/renderer.h
+        renderer/scene.cpp renderer/scene.h
+        renderer/camera.cpp renderer/camera.h renderer/light.h
+        renderer/mesh.cpp renderer/mesh.h
+        renderer/meshfactory.cpp renderer/meshfactory.h
+        renderer/shaders.cpp renderer/shaders.h
+        ui/vulkanview.cpp ui/vulkanview.h
+    )
+    target_include_directories(renderer_smoke_test PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    target_link_libraries(renderer_smoke_test PRIVATE Qt6::Core Qt6::Gui Qt6::Quick Vulkan::Vulkan)
+    add_dependencies(renderer_smoke_test shaders)
+endif()
